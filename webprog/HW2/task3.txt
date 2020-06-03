@@ -1,0 +1,205 @@
+Отправить запросы на https://httpbin.org, проанализировать ответ и код состояния. Описать работу HTTP протокола в каждом запросе.
+
+Код для подключения к httpbing.org:
+
+openssl s_client -connect httpbin.org:443
+
+
+1) IP
+Код запроса:
+
+GET /ip HTTP/1.1
+Host: httpbin.org
+Accept: */*
+
+Отправляем, ждем, возвращается результат:
+
+HTTP/1.1 200 OK
+Date: Sat, 29 Feb 2020 19:04:04 GMT
+Content-Type: application/json
+Content-Length: 32
+Connection: keep-alive
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "origin": "176.59.193.50"
+}
+
+Код 200 информирует пользователя об успешной обработке запроса.
+Далее содержится информация о сайте и IP клиента, представленный в формате JSON.
+
+2) GET
+Код запроса:
+
+GET /get?foo=bar&1=2&2/0&error=True HTTP/1.1
+Host: httpbin.org
+Accept: */*
+
+Результат:
+
+HTTP/1.1 200 OK
+Date: Sat, 29 Feb 2020 19:05:21 GMT
+Content-Type: application/json
+Content-Length: 323
+Connection: keep-alive
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {
+    "1": "2", 
+    "2/0": "", 
+    "error": "True", 
+    "foo": "bar"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+    "X-Amzn-Trace-Id": "Root=1-5e5ab5f1-8dc4ce3cae280d38c9624d48"
+  }, 
+  "origin": "176.59.193.50", 
+  "url": "https://httpbin.org/get?foo=bar&1=2&2%2F0&error=True"
+}
+
+Код 200 информирует пользователя об успешной обработке запроса.
+Далее содержится информация о  параметрах,переданных  в get запросе,заголовки, IP клиента и URL, по которому происходило обращение.
+
+
+3) POST
+
+Код запроса:
+
+POST /post HTTP/1.1
+Host: httpbin.org
+Accept: */*
+Content-Length: 29
+Content-Type: application/x-www-form-urlencoded
+
+foo=bar&1=2&2%2F0=&error=True
+
+Результат:
+
+HTTP/1.1 200 OK
+Date: Sat, 29 Feb 2020 19:11:15 GMT
+Content-Type: application/json
+Content-Length: 445
+Connection: keep-alive
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {}, 
+  "data": "", 
+  "files": {}, 
+  "form": {
+    "1": "2", 
+    "2/0": "", 
+    "error": "True", 
+    "foo": "bar"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Content-Length": "29", 
+    "Content-Type": "application/x-www-form-urlencoded", 
+    "Host": "httpbin.org", 
+    "X-Amzn-Trace-Id": "Root=1-5e5ab753-ab87651c47e15d8e1e5ac9d8"
+  }, 
+  "json": null, 
+  "origin": "176.59.193.50", 
+  "url": "https://httpbin.org/post"
+}
+
+
+Код 200 информирует пользователя об успешной обработке запроса.
+С помощью метода POST были получены параметры, заголовки, IP клиента и URL.
+
+
+4) /cookies/set
+
+Код запроса:
+
+GET /cookies/set?country=Ru HTTP/1.1
+Host: httpbin.org
+Accept: */*
+
+Получаем результат:
+
+HTTP/1.1 302 FOUND
+Date: Sat, 29 Feb 2020 19:12:52 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 223
+Connection: keep-alive
+Server: gunicorn/19.9.0
+Location: /cookies
+Set-Cookie: country=Ru; Path=/
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<title>Redirecting...</title>
+<h1>Redirecting...</h1>
+<p>You should be redirected automatically to target URL: <a href="/cookies">/cookies</a>.  If not click the link.closed
+
+Код 302 указывает на то, что запрошенный документ временно перемещен на другой адрес, который указано в location.
+
+5) /cookies
+
+Подключаемся к домену, вводим следующий запрос:
+
+GET /cookies HTTP/1.1
+Host: httpbin.org
+Accept: */*
+
+Запрос обрабабывается, возвращается результат:
+
+HTTP/1.1 200 OK
+Date: Sat, 29 Feb 2020 19:16:19 GMT
+Content-Type: application/json
+Content-Length: 20
+Connection: keep-alive
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "cookies": {}
+}
+
+Код 200 указывает об успешной обработки запроса.
+Также в формате JSON было возвращено поле cookies.
+Которое оказалось пустым, что говорит об их отсуствии у пользователя.
+
+6)/redirect
+
+Код запроса:
+
+GET /redirect/4 HTTP/1.1
+Host: httpbin.org
+Accept: */*
+
+Запрос обрабабывается, возвращается результат:
+
+HTTP/1.1 302 FOUND
+Date: Sat, 29 Feb 2020 19:17:03 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 247
+Connection: keep-alive
+Server: gunicorn/19.9.0
+Location: /relative-redirect/3
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<title>Redirecting...</title>
+<h1>Redirecting...</h1>
+<p>You should be redirected automatically to target URL: <a href="/relative-redirect/3">/relative-redirect/3</a>.  If not click the link.
+
+Код 302 указывает на то, что запрошенный документ временно перемещен на другой адрес, указанный в поле location.
+Также был возвращен html код страницы.
+
+
+

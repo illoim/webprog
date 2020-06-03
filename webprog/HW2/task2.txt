@@ -1,0 +1,202 @@
+1) Создать ключ шифрования для работы по зашифрованному каналу связи
+Команда для создания:
+
+openssl req -new -x509 -keyout key.pem -out server.pem -days 365 -nodes
+
+Команда openssl req — это запрос на генерацию нового сертификата.
+Параметры:
+-x509 — указывает на создание self-signed сертификата.
+-keyout — имя файла, в который записывается ключ
+-out — имя файла, в который записывается сертификат
+-days — кол-во дней которые сертификат будет валиден
+-nodes — отключаем шифрование получаемого ключа (в ином случае, использование ключа возможно только после ввода пароля)
+
+Были созданы два файла key.pem(ключ), server.pem(сертификат)
+
+2. Поднять веб сервер работающий по протоколу HTTPS
+В файл script.py записывается следующий код:
+
+import ssl
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+httpd = HTTPServer(("0.0.0.0", 4443), SimpleHTTPRequestHandler)
+httpd.socket = ssl.wrap_socket(
+    httpd.socket,
+    certfile="server.pem",
+    keyfile="key.pem",
+    server_side=True,
+    ssl_version=ssl.PROTOCOL_TLS,
+)
+httpd.serve_forever()
+
+Исполняем скрипт, сервер начинает работать.
+
+3.Отправить запрос на локальный сервер
+openssl s_client -connect 127.0.0.1:4443
+
+После подключения, сервер выводит различного рода информацию и ждет запрос
+CONNECTED(00000005)
+
+depth=0 C = AU, ST = Some-State, O = Internet Widgits Pty Ltd
+verify error:num=18:self signed certificate
+verify return:1
+depth=0 C = AU, ST = Some-State, O = Internet Widgits Pty Ltd
+verify return:1
+---
+Certificate chain
+ 0 s:C = AU, ST = Some-State, O = Internet Widgits Pty Ltd
+   i:C = AU, ST = Some-State, O = Internet Widgits Pty Ltd
+---
+Server certificate
+-----BEGIN CERTIFICATE-----
+MIIDazCCAlOgAwIBAgIUdOK3Nvpqd8S7bErndNFgRmI3wnUwDQYJKoZIhvcNAQEL
+BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
+GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMDAyMjkxODM0MjNaFw0yMTAy
+MjgxODM0MjNaMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEw
+HwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEB
+AQUAA4IBDwAwggEKAoIBAQDBVRysKDh8clgF7VGQv6JmLJ4qCAzG3ET0tDHw+G8A
+Q5m4xJsJxQ/2wLqPUp844oDcqaS7DiexLEmK1QzeFDQo3XHDEjLdDxNj6mKfKzcU
+IOusPO/ZO8O6bRRoN3d0e2FtES/T871BaeFp7bUdK3yn32caygha7qSBX1ogOph3
+Cdo8p2UfaleT/stOB8Wa0/NKH6/BVEmz/kxybfyN1f7sjygxyw/l8j54yf1iabX8
+3/opCcexuPYDnZfCmsTSFYuR2JSHVsHWanFhVy2AE7yVhjkIXHKL27Ucg1OuKGpE
+kXjDVN42jFRzjOM4/c6y/672yGh2q/AEfU55sr4RyzVdAgMBAAGjUzBRMB0GA1Ud
+DgQWBBQOmRWUBYMIZJD86hsWF7iF81aikDAfBgNVHSMEGDAWgBQOmRWUBYMIZJD8
+6hsWF7iF81aikDAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQB1
+4/7QPAr8LB359uKjiASdczFyhkQTegiu4XsO2b9Ehvi1yCuOoD9LmxFV9bNutpyK
+h6539VEsvo2CYNwFuDzV6Rb38o7IJtB8L6ePNfCw5Ah9VnWi7qyHTYARUztc+0D8
+hb4s0RjjdKNOdRybXkOpA2FIUBVg4vunVxWeLyad2ItX/mtbfZ3caQwUoxQXNnid
+jHjyqc0iuw7hM2uuI5Dpolf7xBqFi4dOrVguCrg3C8c4SBcGAfjdsp0l3Ua+2DxM
+xZkJQsbxnlZKeggpQxOW0xcURED0yInpxsRB3bY/7ntDTqncHiSvqTl8ifNIccc9
+s0cKBeqrwjKbXrsfM0PL
+-----END CERTIFICATE-----
+subject=C = AU, ST = Some-State, O = Internet Widgits Pty Ltd
+
+issuer=C = AU, ST = Some-State, O = Internet Widgits Pty Ltd
+
+---
+No client certificate CA names sent
+Peer signing digest: SHA256
+Peer signature type: RSA-PSS
+Server Temp Key: X25519, 253 bits
+---
+SSL handshake has read 1435 bytes and written 391 bytes
+Verification error: self signed certificate
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Server public key is 2048 bit
+Secure Renegotiation IS NOT supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 18 (self signed certificate)
+---
+---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Session-ID: 6FB2F349FF1214AEB8F23C6C21E8296D6D5D55845F5A4302AA985CC9E29D0301
+    Session-ID-ctx: 
+    Resumption PSK: C100AF49FF53A59D619E93E188B421E74995D011613DE7BFED97312B9BE0853CD3E5DFA4D5D5504220DC3454FF03C50E
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 7200 (seconds)
+    TLS session ticket:
+    0000 - 43 e5 1c 5c 70 4d 3c 69-9e 23 20 66 b9 76 74 48   C..\pM<i.# f.vtH
+    0010 - a3 97 bd 8e 8c 1c e0 1b-11 bd e9 9e c1 45 60 88   .............E`.
+    0020 - 84 a4 68 2a d9 51 20 eb-71 e8 4c b3 47 87 91 0b   ..h*.Q .q.L.G...
+    0030 - 98 04 66 c4 79 ed e1 70-b2 ac 33 bc 44 57 4c 2c   ..f.y..p..3.DWL,
+    0040 - 3c ff 41 e6 44 48 73 dc-d9 67 d2 85 fa 23 16 49   <.A.DHs..g...#.I
+    0050 - fc f7 ba 37 01 3c 51 0b-93 d7 5e dc 9d 77 69 86   ...7.<Q...^..wi.
+    0060 - 4e 2e a3 18 27 7d 0a d3-b0 be 28 fa a3 bf b2 69   N...'}....(....i
+    0070 - 67 eb b8 7d 81 99 6c 1d-d1 54 48 8d 9d e5 f1 c6   g..}..l..TH.....
+    0080 - 96 d2 f2 78 1e 96 6a 12-95 0f 81 29 39 06 bb b1   ...x..j....)9...
+    0090 - bb 61 7c 1e d6 d0 29 6b-4e 74 a4 98 f3 ef c1 49   .a|...)kNt.....I
+    00a0 - 5b a6 6e e4 39 fe 55 70-f2 87 77 cf 00 bf 78 69   [.n.9.Up..w...xi
+    00b0 - 1d 8a 56 dc 89 0c 9d d3-4a 1e fa ed 04 e1 7c 19   ..V.....J.....|.
+    00c0 - 2f 83 3c 76 27 4f 1a 67-ef 9d 9f 88 3e 06 90 c2   /.<v'O.g....>...
+
+    Start Time: 1583001513
+    Timeout   : 7200 (sec)
+    Verify return code: 18 (self signed certificate)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Session-ID: 4A9F14ABB464352255130982729B15BCB4FE1F948E2A42C0D6600E60877BC9B5
+    Session-ID-ctx: 
+    Resumption PSK: C0A5108C08838ED0A8E7CF548288DF55870CDA46412A402810A44743BA800DBC1447C7C5C763DF40E93B2697B53CF519
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 7200 (seconds)
+    TLS session ticket:
+    0000 - 43 e5 1c 5c 70 4d 3c 69-9e 23 20 66 b9 76 74 48   C..\pM<i.# f.vtH
+    0010 - 17 80 31 0e 7a 92 8f f9-2d c5 22 57 8e 95 5b 95   ..1.z...-."W..[.
+    0020 - 50 78 4b ea f9 d1 07 5f-f3 5f 45 ba 48 a4 cf ee   PxK...._._E.H...
+    0030 - 80 92 48 49 32 58 ce 7b-d7 f8 67 b5 60 9f ee 52   ..HI2X.{..g.`..R
+    0040 - 21 31 5a 3c a1 c5 d3 18-cc 53 b9 e1 d7 cb 4d 9d   !1Z<.....S....M.
+    0050 - f5 15 f7 0e 67 4a 0b 36-2a 82 51 e5 c7 bb 6d 96   ....gJ.6*.Q...m.
+    0060 - d0 97 cb 1e 28 c4 ef 38-59 f6 f9 ee 7c 15 b3 33   ....(..8Y...|..3
+    0070 - 32 17 e6 a2 fe e1 3d 0e-04 24 72 d3 57 f8 6f 26   2.....=..$r.W.o&
+    0080 - b3 62 70 aa 49 10 a3 13-6f 59 66 5e ae 8e 76 b5   .bp.I...oYf^..v.
+    0090 - 55 27 12 0a 5c c6 de 01-58 7f 16 43 c7 4e bc 80   U'..\...X..C.N..
+    00a0 - 7f 7d 66 40 35 23 38 84-b3 12 c0 23 6f 2d 04 ea   .}f@5#8....#o-..
+    00b0 - eb 99 75 39 f7 c1 af 08-de cb aa ae 66 a2 82 f6   ..u9........f...
+    00c0 - d2 54 70 24 2a 4c f9 48-a5 a8 a2 71 1b 1b 83 86   .Tp$*L.H...q....
+
+    Start Time: 1583001513
+    Timeout   : 7200 (sec)
+    Verify return code: 18 (self signed certificate)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+
+Вводим запрос:
+
+GET / HTTP/1.1
+
+Ответ:
+
+HTTP/1.0 200 OK
+Server: SimpleHTTP/0.6 Python/3.6.9
+Date: Sat, 29 Feb 2020 18:38:43 GMT
+Content-type: text/html; charset=utf-8
+Content-Length: 510
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Directory listing for /</title>
+</head>
+<body>
+<h1>Directory listing for /</h1>
+<hr>
+<ul>
+<li><a href="key.pem">key.pem</a></li>
+<li><a href="script.py">script.py</a></li>
+<li><a href="server.pem">server.pem</a></li>
+<li><a href="task1.txt">task1.txt</a></li>
+<li><a href="task2.txt">task2.txt</a></li>
+</ul>
+<hr>
+</body>
+</html>
+read:errno=0
+
+Статус 200 говорит об успешном подключении, в ответ вернулся html код, в котором содержится информация о файлах, которые лежат в рабочей директории.
+
+Также все запросы к серверу записываются в логи
+Пример:
+127.0.0.1 - - [29/Feb/2020 23:38:43] "GET / HTTP/1.1" 200 -
+
+

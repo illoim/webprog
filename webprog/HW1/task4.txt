@@ -1,0 +1,32 @@
+Сперва был написан тривиальный html код, который представлял из себя форму, которая отправляет имя, фамилию, группу, сообщение и картинку на http://httpbin.org/post методом POST.
+
+После заполнения и отправления формы, возвращается следующий ответ. В котором содержится данные, которые были записаны в поля формы,заголовки, IP-адрес клиента и url, куда был отправлен запрос.
+
+{
+  "args": {}, 
+  "data": "", 
+  "files": {}, 
+  "form": {
+    "firstname": "Pavel", 
+    "group": "RI-370018", 
+    "img": "", 
+    "lastname": "Gerasimov", 
+    "message": "My message"
+  }, 
+  "headers": {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9", 
+    "Accept-Encoding": "gzip, deflate", 
+    "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7", 
+    "Cache-Control": "max-age=0", 
+    "Content-Length": "596", 
+    "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryelAqVr9HAPMTAfR2", 
+    "Host": "httpbin.org", 
+    "Origin": "null", 
+    "Upgrade-Insecure-Requests": "1", 
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36 OPR/66.0.3515.72", 
+    "X-Amzn-Trace-Id": "Root=1-5e5252ed-cef54e92d4ee11deb2c62d8b"
+  }, 
+  "json": null, 
+  "origin": "46.163.186.239", 
+  "url": "http://httpbin.org/post"
+}

@@ -1,0 +1,41 @@
+Задание 2
+
+Команда для подключения к http://wikipedia.org  telnet www.wikipedia.org 80
+
+После исполнения, вводится текст запроса:
+
+GET /wiki/страница HTTP/1.1		(запрашиваются данные о https://ru.wikipedia.org/wiki/страница)
+
+Host: ru.wikipedia.org	(Имя домена, к которому идет обращение)
+
+User-Agent: Mozilla/5.0 (X11; U; Linux i686; ru; rv:1.9b5) Gecko/2008050509 Firefox/3.0b5
+
+(указывается клиентское приложение, включающее такую информацию, как название и версию приложения, операционную систему компьютера и язык)
+
+Accept: text/html	(указываются теги, которые нужно принять)
+
+Connection: close	(закрытие соединения)
+
+
+После отправки запроса, происходит его обработка и возвращается следующий ответ:
+
+HTTP/1.1 301 TLS Redirect
+Date: Sun, 23 Feb 2020 08:05:13 GMT
+Server: Varnish
+X-Varnish: 101057734
+X-Cache: cp3064 int
+X-Cache-Status: int-front
+Server-Timing: cache;desc="int-front"
+Set-Cookie: WMF-Last-Access=23-Feb-2020;Path=/;HttpOnly;secure;Expires=Thu, 26 Mar 2020 00:00:00 GMT
+Set-Cookie: WMF-Last-Access-Global=23-Feb-2020;Path=/;Domain=.wikipedia.org;HttpOnly;secure;Expires=Thu, 26 Mar 2020 00:00:00 GMT
+X-Client-IP: 46.163.186.239
+Location: https://ru.wikipedia.org/wiki/страница
+Content-Length: 0
+Connection: close
+
+Connection closed by foreign host.
+
+
+Код 301 говорит о том, что домен находится по другому адресу.
+Далее написаны различные сведения о домене, к которому было обращение.
+И сведения о клиенте, который производил запрос.
